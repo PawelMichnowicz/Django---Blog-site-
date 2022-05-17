@@ -1,28 +1,45 @@
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy, reverse
-from rest_framework import generics, viewsets, status, mixins
+from django.contrib.auth.models import User
+from rest_framework import generics, viewsets, status, mixins, permissions
 from rest_framework.views import APIView
+from rest_framework.mixins import ListModelMixin
 from rest_framework.response import Response
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated,  AllowAny, BasePermission
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
+from knox.auth import TokenAuthentication
 
-
-from django.contrib.auth.models import User 
 from ..models import Tweet, Action, Comment
-from .serializers import TweetSerializer, UserSerializer, UserDetailSerializer, TweetDetailSerializer, ActionSerializer, CommentSerializer
+from .serializers import TweetSerializer, UserSerializer, UserDetailSerializer, UserRegistrationSerializer, TweetDetailSerializer, ActionSerializer, CommentSerializer
 from ..utils import make_action
 from .permissions import TweetPermission
 
-from rest_framework.mixins import ListModelMixin
+
+class RegisterUser(generics.GenericAPIView):
+    # registration view
+    serializer_class = UserRegistrationSerializer
+    permission_classes = [AllowAny,] 
+    authentication_classes = [TokenAuthentication,]
+
+    def post(self, request, *args, **kwargs):
+        serializer = UserRegistrationSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            data['Response'] = 'Założono konto'
+            data['username'] = user.username
+        else:
+            data = serializer.errors
+        return Response(data) 
+
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet): 
 
     queryset = User.objects.all()
-    serializer_class = UserSerializer
 
     def get_serializer_class(self):
+    # chose proper serializer for retrieve (detail view) or list of users
         if self.action == 'retrieve':
             return UserDetailSerializer
         return UserSerializer
@@ -34,37 +51,35 @@ class TweetViewSet(viewsets.ModelViewSet):
     serializer_class = TweetSerializer
     authentication_classes = (BasicAuthentication,)
     permission_classes = [TweetPermission, IsAuthenticated] 
-    
 
     def perform_create(self, serializer):
+    # add activity log after create post
         model = serializer.save()
         make_action(user=self.request.user , verb='utworzył', content_object=model)
 
     def perform_update(self, serializer):
+    # add activity log after edit post
         model = serializer.save()
         make_action(user=self.request.user , verb='edytował', content_object=model)
 
     def get_serializer_class(self):
+    # choose proper serializer for retrive or list
         if self.action == 'retrieve':
             return TweetDetailSerializer
         return TweetSerializer
 
-                #     Próba przypisania możliwości formy do tworzenia komentarza, brak 
-    # def post(self, request, *args, **kwargs): 
-    ##### if detail_view :
-    #     text = request.data['text']
-    #     author = request.user
-    #     post = self.get_object()
-    #     new_comment = Comment.objects.create(post=post, author=author, text=text)
-    #     new_comment.save()
-    #     make_action(user=author, verb='skomentował', content_object=post)
-    #     return Response({'Comment':"Yes"})
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-
-
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['post'], url_name='comment')
+    # action for giving comment 
+    ###### nie wiem jak ustawić odpowiedni formularz żeby wyświatlała się tylko kolumna 'text', aktualnie wyświetla sie 'title' i 'text' 
+    # próba 2
     def comment(self, request, *args, **kwargs): 
-
         post = self.get_object()
         author = request.user
         text = request.data['text']
@@ -73,8 +88,8 @@ class TweetViewSet(viewsets.ModelViewSet):
         make_action(user=author, verb='skomentował', content_object=post)
         return Response({'Commented':True})
 
-
-    @action(detail=True, methods=['post', 'get'], url_path="like", url_name="like")
+    @action(detail=True, methods=['post', 'get'], url_name="like")
+    # action for giving likes
     def like(self, request,  *args, **kwargs):
         post = self.get_object()
         if not request.user in post.users_like.all():
@@ -86,21 +101,51 @@ class TweetViewSet(viewsets.ModelViewSet):
 
 
 class TweetUserViewSet(TweetViewSet):
-
+    # view inherit after TweeTViewSet, shows posts from particular user
     def get_queryset(self):
         username = self.kwargs['id']
         return Tweet.objects.filter(author=username)
 
 
 class ActionViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-
+    
     queryset = Action.objects.all()
     serializer_class = ActionSerializer
 
 
 class CommentCreate(generics.CreateAPIView):
-    queryset = Comment.objects.all()
+    
+    queryset = Tweet.objects.all()
     serializer_class = CommentSerializer
+    
+    # próba 1
+    def post(self, request, *args, **kwargs):
+        serializer = Comment(data=request.data)
+        if serializer.is_valid():
+            post = Tweet.objects.get(id=1)
+            author = request.user
+            text = serializer.text
+            new_comment = Comment(post=post, author=author, text=text)
+            data = {'powstał' : new_comment.post}
+        else:
+            data = {'coś:nie tak'}
+        return Response(data) 
+
+
+    # @action(detail=True, methods=['post'], url_name='comment')
+    # ###### nie wyświetla się żaden html form
+    # def comment(self, request, *args, **kwargs): 
+    #     post = self.get_object()
+    #     author = request.user
+    #     text = request.data['text']
+    #     new_comment = Comment.objects.create(post=post, author=author, text=text)
+    #     new_comment.save()
+    #     make_action(user=author, verb='skomentował', content_object=post)
+    #     return Response({'Commented':True})
+
+
+
+
 
 
 

@@ -7,8 +7,9 @@ from . import views
 
 router = routers.DefaultRouter()
 router.register('users', views.UserViewSet)
-router.register('posts', views.TweetViewSet)
+router.register('posts', views.TweetViewSet, basename='tweet-router')
 router.register('actions', views.ActionViewSet)
+
 
 app_name = 'api'
 
@@ -21,5 +22,7 @@ urlpatterns = [
     # path('users/<int:pk>/', user_detail, name='user-detail'),
     path('', include(router.urls)),
     path('user-tweets/<int:id>/', views.TweetUserViewSet.as_view({'get': 'list'}), name='user-post'),
-    #path('comment-create/<int:pk>/', views.CommentCreate.as_view(), name='comment-create')
+    path('user-registration', views.RegisterUser.as_view(), name='register'),
+    path('comment-tweet/<int:pk>/', views.CommentCreate.as_view(), name='comment' ) # nie wyświetla form html
+
 ]
