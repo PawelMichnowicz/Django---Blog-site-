@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% load thumbnail %}
+
+{% block content %}
+<p class="w3-center w3-black">Utwórz nowy wpis</p>
+
+<form action="." method="post" class="w3-left">
+{{form.as_p}}
+{% csrf_token %}
+<button> Edytuj </button>
+</form>
+
+{% endblock %}

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>{% block title %}{% endblock %}</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+<style>
+body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
+h6 {font-size: 0.875em;}
+.button {
+  border: none;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+.show-buttons, .show-post {
+  background-color: white;
+  color: black;
+  border: 2px solid #e7e7e7;
+}
+.hide-buttons, .hide-post {
+  background-color: white;
+  color: black;
+  border: 2px solid #555555;
+}
+.show-buttons, .hide-buttons {font-size: 24px; }
+
+
+</style>
+
+
+
+{% load thumbnail %}
+
+<body class="w3-light-grey">
+
+<div class="w3-content" style="max-width:1400px">
+
+<header class="w3-container w3-center "> 
+  
+  <div>
+    {% if request.user.is_authenticated %}
+      <a href='{% url 'content:dashboard' %}' class="w3-bar-item w3-button {% if section == 'main' %}w3-black{% endif %}">Strona Główna </a>
+      <a href='{% url 'content:list' %}' class="w3-bar-item w3-button {% if section == 'blog' %}w3-black{% endif %}">Wpisy</a>
+      <a href="#" class="w3-bar-item w3-button">Wiadomości</a>
+    {% else %}
+      <h1 class="w3-bar"> Moja Strona </h1>
+    </div>
+    {% endif %}
+
+    {% if request.user.is_authenticated %}
+    <a href = "{% url 'account:detail' %}">
+      {% thumbnail request.user.profile.image "50x50" crop='smart' as avatar %}
+      <p class="w3-bar w3-left"> <img src="{{avatar.url}}"> {{ request.user.username }}</p>
+    </a>
+
+      <p class="w3-bar w3-right">
+        <a href="{% url 'account:logout' %}" >Wyloguj </a>
+      </p>
+    
+    {% else %}
+    <div class="w3-bar w3-right">
+      <a href="{% url 'account:login' %}" >Logowanie </a>
+      <br>
+      <a href="{% url 'account:register' %}" >Rejestracja </a>
+
+    </div>
+
+  </div>
+    {% endif %}
+
+
+  <p class="w3-center w3-black">   </p>
+</header>
+</div>
+
+
+{% if messages %}
+<ul class="messages">
+  {% for message in messages %}
+    <li class="{{ message.tags }}">
+      {{ message|safe }}
+        <a href="#" class="close">x</a>
+    </li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+<div id="content">
+    {% block content %}
+    {% endblock %}
+  </div>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@2.2.1/src/js.cookie.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script>
+    var csrftoken = Cookies.get('csrftoken');
+    function csrfSafeMethod(method) {
+      // these HTTP methods do not require CSRF protection
+      return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+    $.ajaxSetup({
+      beforeSend: function(xhr, settings) {
+        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+          xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        }
+      }
+    });
+
+    $(document).ready(function(){
+      {% block domready %}
+      {% endblock %}
+    });
+
+
+
+  </script>
+
+</body>
+

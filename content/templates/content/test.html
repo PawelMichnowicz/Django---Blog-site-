@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% load thumbnail %}
+
+{% block content %}
+<p class="w3-center w3-black">Wpisy</p>
+<a href='{% url "content:create" %}'><h3 class="w3-text-teal w3-center" > Dodaj nowy wpis </h3> </a>
+
+<form action="." method="get">
+{{form.as_p}}
+</form>
+
+
+<div id="image-list">
+    {% for post in posts %}
+    <div class='w3-container w3-card w3-white w3-margin-bottom'>
+
+    <p class="w3-text-teal"> 
+        <a href='{{post.get_absolute_url}}'><h1 class="w3-center">{{ post.title}}</h1></a>
+        {% thumbnail post.author.profile.image "50x50" crop='smart' as avatar %}  <img src="{{avatar.url}}"> 
+        {{ post.author.username}} 
+        <p class="w3-right"> {{ post.date_create}} </p>
+        <p class="w3-center"> {{post.text}} </p>
+        <button id='id-{{post.id}}' class="like" data-id="{{post.id}}" 
+        data-action="{% if request.user in post.users_like.all %}un{%endif%}like"> 
+        {% if request.user in post.users_like.all %}Odlub{% else %}Polub{%endif%} </button>
+        <p> <span id='id-{{post.id}}' class=like>{{post.users_like.count}}</span> polubień </p>
+    </p>
+    </div>
+{% endfor %}
+
+</div>
+
+
+{% endblock %}

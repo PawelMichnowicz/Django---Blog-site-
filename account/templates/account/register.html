@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<p class="w3-center w3-black">Rejestracja</p>
+{% if user_form.erros %}
+<h> Dane są nieprawidłowe </h>
+{% endif %}
+
+<form action="." method="post" enctype="multipart/form-data" class="w3-left">
+    {{user_form.as_p}}
+    {{profile_form.as_p}}
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}"/>
+    <input class="w3-button w3-black" type='submit' value='Zarejestruj' accept="image/*">
+</form>
+
+
+{% endblock %}

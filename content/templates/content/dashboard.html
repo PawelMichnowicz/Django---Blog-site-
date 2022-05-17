@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% load thumbnail %}
+
+{% block content %}
+<p class="w3-center w3-black">Strona główna</p>
+
+<div class='w3-twothird w3-right actions' id="actions"  style = "position:relative; left:40px; ">
+    <h1> Dziennik aktywności: <button class="button show-actions"> Pokaż </button> </h1>
+    <div class="action-content" hidden> <! –– button for showing and hiding activity logs ––> 
+    {% for action in actions %}
+        <h5>{% thumbnail action.user.profile.image "35x35" crop='smart' as avatar %}
+            <a href={% url 'account:user_detail' action.user.username %}>  <img src="{{avatar.url}}"> {{action.user.username}}</a> {{action.verb}} <a href="{% url 'content:detail' action.content_object.slug %}"> post </a>
+            <small> {{action.date}}</small>
+        </h5>
+    {% endfor %}
+    </div>
+</div>
+
+
+<div class='w3-third w3-center' id="buttons">
+    <h1> Pokaż najpopularniejsze: </h1> 
+    <! –– choose between top users and posts, after clicking appriopriate button the next ones relating to ordering appear ––> 
+    <button class="show-buttons button" data-url="{% url 'content:dash_posts_ajax' %}"> Wpisy </button>
+    <button class="show-buttons button" data-url="{% url 'content:dash_users_ajax' %}"> Użytkowników </button>
+
+    <div hidden class='buttons-post'>
+        <! –– buttons for choice the argument for ordering top posts/users ––> 
+        <h4> Według: </h4>
+        <button class="show-post button comments " data-choice="-num_comments"> Komentarzy </button>
+        <button class="show-post button likes " data-choice="-num_likes"> Polubień </button>
+        <button class="show-post button hits " data-choice="-hits"> Wyświetleń </button>
+    </div>
+
+
+
+    <div id="post-list"></div>
+
+</div>
+{% endblock %}
+
+{% block domready %}
+$('div#actions').on('click', 'button.hide-actions', function(){
+    // hide the activity log after click button and change text for "Pokaż" 
+    $("div.action-content").hide()
+    $(this).addClass('show-actions')
+    $(this).removeClass('hide-actions')
+    $(this).text("Pokaż")
+})
+
+$('div#actions').on('click', 'button.show-actions', function(){
+    // show the activity log after click button and change text for "Ukryj"  
+    $("div.action-content").show()
+    $(this).addClass('hide-actions')
+    $(this).removeClass('show-actions')
+    $(this).text("Ukryj")
+})
+
+
+$('div#buttons').on('click', 'button.show-buttons', function(){
+    // show buttons for choice ordering params and add button frame for clicked button
+    $("div.buttons-post").show()
+    $('button.hide-buttons').addClass('show-buttons')
+    $('button.hide-buttons').removeClass('hide-buttons')
+    $(this).removeClass('show-buttons')
+    $(this).addClass('hide-buttons')
+
+    if($('.hide-post').length)
+    // if one of button for choice users/posts is clicked and content is show, change the content for clicked options form example from top comment posts to top comment users 
+        var url = $(this).data('url') + '?choice=' + $('button.hide-post').data('choice') // preapre right url adress for get content
+        $.get(
+        url = url,
+        function(data){
+            // take content from ajax template to add in this page
+            $('div#post-list').html($("div#ajax-list", data))
+        })
+})
+
+$('div#buttons').on('click', 'button.hide-buttons', function(){
+    // after click on clicked button for choice user/post hide content and unclicked button by delete button frame
+    $("div.buttons-post").hide()
+    $(this).addClass('show-buttons')
+    $(this).removeClass('hide-buttons')
+    $('div#post-list').html('')
+    $('button.hide-post').addClass('show-post')
+    $('button.hide-post').removeClass('hide-post')
+})
+
+
+$('div#buttons').on('click', 'button.show-post', function(){
+    // after click on button for choice ordering show content and add frame for clicked button
+    var url = $('button.hide-buttons').data('url') + '?choice=' + $(this).data('choice') // preapre right url adress for get content
+    $('button.hide-post').addClass('show-post')
+    $('button.hide-post').removeClass('hide-post')
+    $(this).removeClass('show-post')
+    $(this).addClass('hide-post')
+    $.get(
+    url = url,
+    function(data){
+        // take content from ajax template to add in this page
+        $('div#post-list').html($("div#ajax-list", data))
+    })
+})
+
+
+$('div#buttons').on('click', 'button.hide-post', function(){
+    // after click on clicked button for choice ordering, hide content and delate frame for clicke button
+    $('div#post-list').html('')
+    $(this).addClass('show-post')
+    $(this).removeClass('hide-post')
+})
+
+
+
+{% endblock %}

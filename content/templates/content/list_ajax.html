@@ -1,0 +1,21 @@
+{% load thumbnail %}
+
+{% for post in posts %}
+    <div class='w3-container w3-card w3-white w3-margin-bottom'>
+
+        <a href='{{post.get_absolute_url}}'><h1 class="w3-center">{{ post.title}}</h1></a>
+        <a href="{% url 'account:user_detail' post.author.username %}">
+        {% thumbnail post.author.profile.image "50x50" crop='smart' as avatar %}  <img src="{{avatar.url}}"> 
+        {{ post.author.username}} </a>
+        {% if post.author == request.user %}
+        <a href="{% url 'content:post_edit' post.slug %}"><p class="w3-right">Edytuj</p>
+        {% endif %}</a>
+        <div> {{ post.date_create}} </div>
+        <a href='{{post.get_absolute_url}}'> <h4 class="w3-center"> <b>{{post.text}}</b> </h4> </a>
+        <button id='id-{{post.id}}' class="like w3-left" data-id="{{post.id}}" 
+        data-action="{% if request.user in post.users_like.all %}un{%endif%}like"> 
+        {% if request.user in post.users_like.all %}Odlub{% else %}Polub{%endif%} </button>
+        <p class='w3-left'> <span id='id-{{post.id}}' class=like>{{post.users_like.count}}</span> polubień </p>
+        <a href='{{post.get_absolute_url}}'><p class='w3-right' style="margin:10;display:inline"> {{post.comments.count}} Komentarzy </p></a>
+    </div>
+{% endfor %}

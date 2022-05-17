@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% load thumbnail %}
+
+{% block content %}
+<h1 class='w3-center'>{{user.username}} <br>
+{% thumbnail user.profile.image "320x320" crop='smart' as avatar %}  <img src="{{avatar.url}}"> </h1>
+<p class='w3-center'>Liczba postów : {{user.posts.count}}
+    {% if user.posts.count > 0 %}
+    <a href="{% url 'content:user_list' user.username %}"> Zobacz jego posty</a>
+    {% endif %}
+</p> 
+<p class='w3-center'>Liczba kommentarzy : {{user.comments.count}}</p>
+
+
+
+
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% load thumbnail %}
+
+{% block content %}
+
+<div>
+
+    <form action="." method="get">
+        {{ form.as_table }}
+    </form>
+
+    <div id='ajax-list'>
+        
+        {% for user in users %}
+        <div class='w3-container w3-card w3-white w3-margin-bottom'>
+            <h3> 
+                {% thumbnail user.profile.image "20x20" crop='smart' as avatar %}
+                <a href={% url 'account:user_detail' user.username %}>  <img src="{{avatar.url}}"> {{user.username}} </a>
+            </h3>
+
+            {% if choice == '-num_comments' %}
+            <p class="w3-center"> <span id='id-{{user.id}}' class=like>{{user.comments.count}}</span> Komentarzy </p>
+            {% elif choice == '-num_likes' %}
+            <p class="w3-center"> <span id='id-{{user.id}}' class=like>{{user.likes.count}}</span> polubienia </p>
+            {% else %}
+            <p class="w3-center"> <span id='id-{{user.id}}' class=like>{{user.hits}}</span> wyświetleń </p>
+            {% endif %}
+            </h3>
+        </div>
+
+        {% endfor %}
+    </div>
+</div>
+
+
+
+{% endblock %}

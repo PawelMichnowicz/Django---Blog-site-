@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% load thumbnail %}
+
+{% block content %}
+<p class="w3-center w3-black">Szczegóły konta</p>
+
+
+<div class=" w3-row-padding">
+<div class=" w3-third w3-text-grey ">
+    <a href="{% url 'account:password_change' %}"> Zmień hasło </a>
+    <form action="." method="POST" enctype="multipart/form-data">
+        {{image_form.as_p}}
+        {% csrf_token %}
+        <button type="submit">Zatwierdź</button>
+    </form>
+</div>
+
+<div class="w3-center">
+    Nazwa użytkownika : <b>{{ request.user.username }}</b> <br>
+    Email : <b>{{ request.user.email }}</b> <br>
+    Avatar : {% thumbnail request.user.profile.image "50x50" crop='smart' as avatar %}  <img src="{{avatar.url}}"> <br>
+</div>
+
+</div>
+{% endblock %}

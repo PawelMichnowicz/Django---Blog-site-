@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% load thumbnail %}
+
+{% block content %}
+<p class="w3-center w3-black">Wpisy</p>
+
+{% if form %}
+    <a href='{% url "content:create" %}'><h3 class="w3-text-teal w3-center" > Dodaj nowy wpis </h3> </a>
+
+    <form action="." method="get">
+        {{form.as_ul}}
+    </form>
+{% else %}
+    <h1 class="w3-center"> Posty użytkownika  <a href={% url 'account:user_detail' user.username %}>{{user.username}}</a></h1>
+{% endif %}
+
+<div id="image-list">
+    
+    {% include "content/list_ajax.html" %}
+</div>
+{% endblock %}
+
+{% block domready %}
+
+var page = 1;
+var empty_page = false;
+var block_request = false;
+var max_page = {{posts.paginator.num_pages}};
+
+
+$(window).scroll(function(){
+    var margin = $(document).height() - $(window).height()
+    var postion = $(document).scrollTop()
+    if (0.9*margin < postion && block_request==false) {
+        page += 1
+        block_request=true
+        console.log('{{choice}}')
+        $.get(
+            url = '?choice=' + '{{choice}}' + '&page=' + page,
+            // prepare right adress url for get data including pagination and choice for ordering, after scrolling
+            function(data){
+                if (page > max_page) {
+                    empty_page = true}
+                else{
+                    $('#image-list').append(data);
+                    block_request=false}
+            }
+
+        )
+    }
+})
+
+
+$('#image-list').on('click', 'button.like', function(){
+    // function for ability to give likes
+    var id_but = $(this).data('id')
+    console.log('klik')
+    $.post(
+        '{% url "content:post_like" %}',
+        data = {
+            id : $(this).data('id'),
+            action : $(this).data('action')
+        },
+        function(){
+            var button_id = 'button#id-'+ id_but
+            var span_id = 'span#id-'+ id_but
+            var previous_action = $(button_id).data('action')
+            var previous_likes = parseInt($(span_id ).text())
+            $(button_id).data('action', previous_action == 'unlike' ? 'like' : 'unlike');
+            $(button_id).text(previous_action == 'unlike' ? 'Polub' : 'Odlub');
+            $(span_id).text(previous_action == 'unlike' ? previous_likes-1 : previous_likes+1)}
+    )
+})
+{% endblock %}
+

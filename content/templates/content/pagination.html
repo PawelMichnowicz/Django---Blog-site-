@@ -1,0 +1,13 @@
+<div class="pagination">
+    <h2>
+        {% if page.has_previous %}
+        <a href="?page={{page.previous_page_number}}">Poprzednia</a>
+        {% endif %}
+        <span>
+            Strona {{page.number}} z {{page.paginator.num_pages}}
+        </span>
+        {% if page.has_next %}
+        <a href="?page={{page.next_page_number}}">Natsępna</a>
+        {% endif %}
+    </h2>
+</div>

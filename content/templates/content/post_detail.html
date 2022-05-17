@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% load thumbnail %}
+
+{% block content %}
+<div class='w3-container w3-card w3-white w3-margin-bottom'>
+<p class="w3-text-teal"> 
+    <h1 class="w3-center">{{ post.title}}</h1>
+    <a href="{% url 'account:user_detail' post.author.username %}">{% thumbnail post.author.profile.image "50x50" crop='smart' as avatar %}  <img src="{{avatar.url}}"> 
+    {{ post.author.username}}  </a>
+    {% if post.author == request.user %}
+    <a href="{% url 'content:post_edit' post.slug %}"><p class="w3-right">Edytuj</p>
+    {% endif %}</a>
+    <div> {{ post.date_create}} </div>
+    <h4 class="w3-center"> <b>{{post.text}}</b> </h4>
+</p>
+</div>
+
+<form action="." method="post" class="w3-center">
+{{form.as_p}}
+{% csrf_token %}
+<input class="w3-button w3-black" type='submit' value='Dodaj komentarz'>
+</form>
+<div><h1> Komentarze:</div></h1>
+
+{% for comment in comments %}
+
+<div class='w3-display-container w3-card w3-white w3-margin' style="height:80px;">
+<a href="{% url 'account:user_detail' comment.author.username %}">{% thumbnail comment.author.profile.image "50x50" crop='smart' as avatar %}  <img src="{{avatar.url}}"> 
+{{ comment.author.username}} </a>
+<div class="w3-display-middle"> {{comment.text}} </div>
+<div class="w3-display-topright"> {{ comment.date_create}} </div>
+
+</div>
+{% endfor %}
+
+{% endblock %}

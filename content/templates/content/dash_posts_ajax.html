@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% load thumbnail %}
+
+{% block content %}
+
+
+<div id="image-list">
+
+    <form action="." method="get">
+        {{ form.as_table }}
+    </form>
+
+    <div id='ajax-list'>
+        
+        {% for post in posts %}
+        <div class='w3-container w3-card w3-white w3-margin-bottom'>
+            {% thumbnail post.author.profile.image "20x20" crop='smart' as avatar %}
+            
+                <a href='{{post.get_absolute_url}}'>
+                    <h3 class="w3-center">{{ post.title}}
+                </a>
+                Zapostowany przez: <a href={% url 'account:user_detail' post.author.username %}>  <img src="{{avatar.url}}">
+                    {{post.author.username}} </a> </h3>
+                {% if choice == '-num_comments' %}
+            <p class="w3-center"> <span id='id-{{post.id}}' class=like>{{post.comments.count}}</span> Komentarzy </p>
+            {% elif choice == '-num_likes' %}
+            <p class="w3-center"> <span id='id-{{post.id}}' class=like>{{post.users_like.count}}</span> polubienia </p>
+            {% else %}
+            <p class="w3-center"> <span id='id-{{post.id}}' class=like>{{post.hits}}</span> wyświetleń </p>
+            {% endif %}
+            
+        </div>
+
+        {% endfor %}
+    </div>
+</div>
+
+
+
+{% endblock %}
