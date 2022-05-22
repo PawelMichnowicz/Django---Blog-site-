@@ -79,6 +79,7 @@ class TweetViewSet(viewsets.ModelViewSet):
     # action for giving comment 
     ###### nie wiem jak ustawić odpowiedni formularz żeby wyświatlała się tylko kolumna 'text', aktualnie wyświetla sie 'title' i 'text' 
     # próba 2
+    
     def comment(self, request, *args, **kwargs): 
         post = self.get_object()
         author = request.user

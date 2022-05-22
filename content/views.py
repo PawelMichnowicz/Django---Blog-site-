@@ -108,7 +108,7 @@ def post_edit(request, slug):
 def post_detail(request, slug):
     post = get_object_or_404(Tweet, slug=slug)
     comments = post.comments.all()
-    post.hit_page(request.user) # function for increase hit page for post and user
+    post.hit_page(request.user) # function for increase hit page for post and user #1 #+1
 
     if request.method == "POST":
         # for adding new comment
@@ -118,8 +118,8 @@ def post_detail(request, slug):
             new_comment.author = request.user
             new_comment.post = post
             new_comment.save()
-            make_action(request.user, 'skomentował', post) # save activity in logs
-            post.hit_page(request.user, comment=True)
+            make_action(request.user, 'skomentował', post) # save activity in logs #2
+            post.hit_page(request.user, comment=True)   
             form = NewCommentForm(None)
     else:
         form = NewCommentForm()

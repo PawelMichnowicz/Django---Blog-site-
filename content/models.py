@@ -55,10 +55,9 @@ class Tweet(models.Model):
         if not self.slug:
             self.slug = self.unique_slug(self.title)
             self.title = self.title.lower().capitalize()
-            super().save(*args, **kwargs)
         else:
             self.date_edit = timezone.now()
-            super().save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     def get_absolute_url(self):
         return reverse("content:detail", args=[self.slug])
