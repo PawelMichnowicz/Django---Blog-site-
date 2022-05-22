@@ -1,19 +1,15 @@
 from django.shortcuts import render
-from django.http import HttpResponse
-from django.contrib.auth import authenticate, login
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login
 from django.contrib import messages
-from django.contrib.auth.models import User 
-
+from django.contrib.auth import get_user_model
 from . import forms
-from content.models import Tweet
 
-# Create your views here.
+
 
 
 def user_detail(request, username):
     # info about choosen user (number of posts/comments)
-    user = User.objects.get(username=username)
+    user = get_user_model().objects.get(username=username)
     return render(request, 'account/user_detail.html', {'user':user})
 
 def detail(request):

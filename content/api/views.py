@@ -1,26 +1,22 @@
-from django.shortcuts import get_object_or_404
-from django.urls import reverse_lazy, reverse
-from django.contrib.auth.models import User
-from rest_framework import generics, viewsets, status, mixins, permissions
-from rest_framework.views import APIView
-from rest_framework.mixins import ListModelMixin
+from django.contrib.auth import get_user_model
+from rest_framework import generics, viewsets, status, mixins
 from rest_framework.response import Response
 from rest_framework.authentication import BasicAuthentication
-from rest_framework.permissions import IsAuthenticated,  AllowAny, BasePermission
-from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated,  AllowAny
+from rest_framework.decorators import action
 from knox.auth import TokenAuthentication
 
-from ..models import Tweet, Action, Comment
-from .serializers import TweetSerializer, UserSerializer, UserDetailSerializer, UserRegistrationSerializer, TweetDetailSerializer, ActionSerializer, CommentSerializer
+from ..models import Post, Action, Comment
+from .serializers import PostSerializer, UserSerializer, UserDetailSerializer, UserRegistrationSerializer, PostDetailSerializer, ActionSerializer, CommentSerializer
 from ..utils import make_action
-from .permissions import TweetPermission
+from .permissions import PostPermission
 
 
 class RegisterUser(generics.GenericAPIView):
     # registration view
     serializer_class = UserRegistrationSerializer
-    permission_classes = [AllowAny,] 
-    authentication_classes = [TokenAuthentication,]
+    permission_classes = [AllowAny, ]
+    authentication_classes = [TokenAuthentication, ]
 
     def post(self, request, *args, **kwargs):
         serializer = UserRegistrationSerializer(data=request.data)
@@ -30,43 +26,44 @@ class RegisterUser(generics.GenericAPIView):
             data['username'] = user.username
         else:
             data = serializer.errors
-        return Response(data) 
+        return Response(data)
 
 
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
 
-class UserViewSet(viewsets.ReadOnlyModelViewSet): 
-
-    queryset = User.objects.all()
+    queryset = get_user_model().objects.all()
 
     def get_serializer_class(self):
-    # chose proper serializer for retrieve (detail view) or list of users
+        # chose proper serializer for retrieve (detail view) or list of users
         if self.action == 'retrieve':
             return UserDetailSerializer
         return UserSerializer
 
 
-class TweetViewSet(viewsets.ModelViewSet): 
+class PostViewSet(viewsets.ModelViewSet):
 
-    queryset = Tweet.objects.all()
-    serializer_class = TweetSerializer
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
     authentication_classes = (BasicAuthentication,)
-    permission_classes = [TweetPermission, IsAuthenticated] 
+    permission_classes = [PostPermission, IsAuthenticated]
 
     def perform_create(self, serializer):
-    # add activity log after create post
+        # add activity log after create post
         model = serializer.save()
-        make_action(user=self.request.user , verb='utworzył', content_object=model)
+        make_action(user=self.request.user,
+                    verb='utworzył', content_object=model)
 
     def perform_update(self, serializer):
-    # add activity log after edit post
+        # add activity log after edit post
         model = serializer.save()
-        make_action(user=self.request.user , verb='edytował', content_object=model)
+        make_action(user=self.request.user,
+                    verb='edytował', content_object=model)
 
     def get_serializer_class(self):
-    # choose proper serializer for retrive or list
+        # choose proper serializer for retrive or list
         if self.action == 'retrieve':
-            return TweetDetailSerializer
-        return TweetSerializer
+            return PostDetailSerializer
+        return PostSerializer
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -76,18 +73,18 @@ class TweetViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     @action(detail=True, methods=['post'], url_name='comment')
-    # action for giving comment 
-    ###### nie wiem jak ustawić odpowiedni formularz żeby wyświatlała się tylko kolumna 'text', aktualnie wyświetla sie 'title' i 'text' 
+    # action for giving comment
+    # nie wiem jak ustawić odpowiedni formularz żeby wyświatlała się tylko kolumna 'text', aktualnie wyświetla sie 'title' i 'text'
     # próba 2
-    
-    def comment(self, request, *args, **kwargs): 
+    def comment(self, request, *args, **kwargs):
         post = self.get_object()
         author = request.user
         text = request.data['text']
-        new_comment = Comment.objects.create(post=post, author=author, text=text)
+        new_comment = Comment.objects.create(
+            post=post, author=author, text=text)
         new_comment.save()
         make_action(user=author, verb='skomentował', content_object=post)
-        return Response({'Commented':True})
+        return Response({'Commented': True})
 
     @action(detail=True, methods=['post', 'get'], url_name="like")
     # action for giving likes
@@ -96,46 +93,45 @@ class TweetViewSet(viewsets.ModelViewSet):
         if not request.user in post.users_like.all():
             post.users_like.add(request.user)
             make_action(request.user, 'polubił', post)
-            return Response({"liked":True})
+            return Response({"liked": True})
         else:
-            return Response({"liked":False})
+            return Response({"liked": False})
 
 
-class TweetUserViewSet(TweetViewSet):
-    # view inherit after TweeTViewSet, shows posts from particular user
+class PostUserViewSet(PostViewSet):
+    # view inherit after PostViewSet, shows posts from particular user
     def get_queryset(self):
         username = self.kwargs['id']
-        return Tweet.objects.filter(author=username)
+        return Post.objects.filter(author=username)
 
 
 class ActionViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    
+
     queryset = Action.objects.all()
     serializer_class = ActionSerializer
 
 
 class CommentCreate(generics.CreateAPIView):
-    
-    queryset = Tweet.objects.all()
+
+    queryset = Post.objects.all()
     serializer_class = CommentSerializer
-    
+
     # próba 1
     def post(self, request, *args, **kwargs):
         serializer = Comment(data=request.data)
         if serializer.is_valid():
-            post = Tweet.objects.get(id=1)
+            post = Post.objects.get(id=1)
             author = request.user
             text = serializer.text
             new_comment = Comment(post=post, author=author, text=text)
-            data = {'powstał' : new_comment.post}
+            data = {'powstał': new_comment.post}
         else:
             data = {'coś:nie tak'}
-        return Response(data) 
-
+        return Response(data)
 
     # @action(detail=True, methods=['post'], url_name='comment')
     # ###### nie wyświetla się żaden html form
-    # def comment(self, request, *args, **kwargs): 
+    # def comment(self, request, *args, **kwargs):
     #     post = self.get_object()
     #     author = request.user
     #     text = request.data['text']
@@ -143,11 +139,6 @@ class CommentCreate(generics.CreateAPIView):
     #     new_comment.save()
     #     make_action(user=author, verb='skomentował', content_object=post)
     #     return Response({'Commented':True})
-
-
-
-
-
 
 
 # class TweetListView(generics.ListAPIView):
@@ -167,5 +158,3 @@ class CommentCreate(generics.CreateAPIView):
 #         post.users_like.add(request.user)
 #         make_action(request.user, 'polubił', post)
 #         return Response({"liked":True})
-
-

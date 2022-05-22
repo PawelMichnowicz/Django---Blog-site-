@@ -1,12 +1,8 @@
 from django.contrib import admin
-from django.contrib.auth.models import User
+from .models import Post, Comment, Action
 
-# Register your models here.
-from django.contrib import admin
-from .models import Tweet, Comment, Action
-
-@admin.register(Tweet)
-class TweetAdmin(admin.ModelAdmin):
+@admin.register(Post)
+class PostAdmin(admin.ModelAdmin):
     list_display = ['pk', 'author', 'text', 'title','date_create', 'date_edit']
     list_editable = ['text', 'title']
 

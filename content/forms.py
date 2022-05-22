@@ -1,7 +1,7 @@
 from django import forms
-from django.contrib.auth.models import User
 
-from .models import Comment, Tweet
+from .models import Comment, Post
+
 
 class ChoiceOrderForm(forms.Form):
     # form for choice ordering posts in list of posts
@@ -12,19 +12,20 @@ class ChoiceOrderForm(forms.Form):
         ('-num_comments', 'Liczby komentarzy'),
         ('title', 'Alfabetycznie')],
         widget=forms.Select(attrs={'onchange': 'submit();'})
-        )
+    )
     choice.label = 'Sortuj według:'
 
 
-class ShowTweet(forms.Form):
+class ShowPost(forms.Form):
     # form for choice param by which top posts will be sorted
     choice = forms.ChoiceField(choices=[
         ('-num_likes', 'Najwięcej polubień'),
         ('-num_comments', 'Najczęściej komentowane'),
         ('-hits', 'Najczęściej odwiedzane'),
-        ],
+    ],
         widget=forms.RadioSelect(attrs={'onchange': 'submit();'}))
     choice.label = 'Pokaż'
+
 
 class ShowUsers(forms.Form):
     # form for choice param by which top users will be sorted
@@ -33,20 +34,22 @@ class ShowUsers(forms.Form):
         ('-num_comments', 'Najczęściej komentowane'),
         ('-hits', 'Najwięcej wyświelteń'),
     ],
-    widget=forms.RadioSelect(attrs={'onchange': 'submit();'}))
+        widget=forms.RadioSelect(attrs={'onchange': 'submit();'}))
     choice.label = 'Pokaż'
 
-class NewTweetForm(forms.ModelForm):
+
+class NewPostForm(forms.ModelForm):
     class Meta:
-        model = Tweet
+        model = Post
         fields = ['title', 'text']
 
 
-class EditTweetForm(forms.ModelForm):
+class EditPostForm(forms.ModelForm):
     # form for editing post
     class Meta:
-        model = Tweet
+        model = Post
         fields = ['text']
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['text'].widget.attrs['style'] = 'resize: none;'
@@ -60,7 +63,7 @@ class NewCommentForm(forms.ModelForm):
     class Meta:
         model = Comment
         fields = ['text']
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['text'].widget.attrs['style'] = 'resize: none;'

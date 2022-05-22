@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.forms import AuthenticationForm
-from django.forms.widgets import ClearableFileInput, FileInput
+from django.forms.widgets import  FileInput
 
 from account.models import Profile
 
