@@ -11,9 +11,11 @@ class ChoiceOrderForm(forms.Form):
         ('-num_likes', 'Liczby polubień'),
         ('-num_comments', 'Liczby komentarzy'),
         ('title', 'Alfabetycznie')],
-        widget=forms.Select(attrs={'onchange': 'submit();'})
+        widget=forms.Select(attrs={'onchange': 'submit();'},),
+        required = False,
     )
     choice.label = 'Sortuj według:'
+    
 
 
 class ShowPost(forms.Form):
