@@ -26,7 +26,8 @@
 var page = 1;
 var empty_page = false;
 var block_request = false;
-var max_page = {{posts.paginator.num_pages}};
+var max_page = {{paginator.num_pages}};
+
 
 
 $(window).scroll(function(){
@@ -40,7 +41,7 @@ $(window).scroll(function(){
             url = '?choice=' + '{{choice}}' + '&page=' + page,
             // prepare right adress url for get data including pagination and choice for ordering, after scrolling
             function(data){
-                if (page > max_page) {
+                if (page >= max_page) {
                     empty_page = true}
                 else{
                     $('#image-list').append(data);

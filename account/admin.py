@@ -17,8 +17,8 @@ class ProfileInline(admin.StackedInline):
     fk_name = 'user'
 
 class CustomUserAdmin(UserAdmin):
+    # for adding profile to admin site
     inlines = (ProfileInline, )
-
     def get_inline_instances(self, request, obj=None):
         if not obj:
             return list()
