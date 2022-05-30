@@ -5,7 +5,6 @@ from django.contrib.auth import get_user_model
 from content.models import Post, Comment, Action
 from account.models import Profile
 
-
 class ImageSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Profile
@@ -31,7 +30,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         fields = ['email', 'username', 'password', 'password2']
         extra_kwargs = {'password': {'write_only': True}}
 
-    def create(self):
+    def create(self): # 
         user = get_user_model(email=self.validated_data['email'],
                     username=self.validated_data['username'])
         password = self.validated_data['password']
@@ -76,8 +75,9 @@ class UserDetailSerializer(serializers.HyperlinkedModelSerializer):
                   'posts', 'num_comments', 'num_likes', 'num_hits']
 
 
+
 class CommentSerializer(serializers.ModelSerializer):
-    author = UserSerializer(many=False, read_only=True)
+    author = UserSerializer(many=False, read_only=True) 
 
     class Meta:
         model = Comment
@@ -152,7 +152,7 @@ class ActionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Action
-        fields = ['id', 'user', 'verb', 'post']
+        fields = ['id', 'user', 'verb', '']
 
 
 #      class PostSerializer(serializers.ModelSerializer):
