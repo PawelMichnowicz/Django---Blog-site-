@@ -10,3 +10,6 @@ app/__pycache__/
 app/*/__pycache__/
 app/*/*/__pycache__/
 app/*/*/*/__pycache__/
+
+# DB
+dumpdata.json

@@ -1,7 +1,7 @@
 FROM python:3.10.2-slim
 
 
-WORKDIR /app
+WORKDIR /django
 
 
 RUN python -m pip install --upgrade pip
