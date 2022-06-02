@@ -58,7 +58,6 @@ class Register(TemplateView):
 
             new_profile = profile_form.save(commit=False)
             new_profile.user = new_user
-
             new_user.save()
             new_profile.save()
 

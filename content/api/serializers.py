@@ -11,13 +11,13 @@ class ImageSerializer(serializers.HyperlinkedModelSerializer):
         fields = ['image']
 
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     profile = ImageSerializer(many=False, read_only=True)
-    url = serializers.HyperlinkedIdentityField(view_name="api:user-detail")
+    url_profile = serializers.HyperlinkedIdentityField(view_name="api:user-detail")
 
     class Meta:
         model = get_user_model()
-        fields = ['id', 'url', 'username', 'profile']
+        fields = ['id', 'url_profile', 'username', 'profile']
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -47,7 +47,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return user
 
 
-class UserDetailSerializer(serializers.HyperlinkedModelSerializer):
+class UserDetailSerializer(serializers.ModelSerializer):
     profile = ImageSerializer(many=False, read_only=True)
     posts = serializers.HyperlinkedIdentityField(
         view_name="api:user-post", lookup_field='id')
@@ -87,12 +87,11 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = ['id', 'author', 'text']
 
 
-class PostSerializer(serializers.HyperlinkedModelSerializer):
+class PostSerializer(serializers.ModelSerializer):
 
-    url = serializers.HyperlinkedIdentityField(
+    url_post = serializers.HyperlinkedIdentityField(
         view_name='api:post-router-detail')
-    author = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name='api:user-detail')
+    author = UserSerializer(many=False, read_only=True) 
     num_comments = serializers.SerializerMethodField()
     num_likes = serializers.SerializerMethodField()
 
@@ -106,14 +105,13 @@ class PostSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['id', 'url', 'title', 'text',
+        fields = ['id', 'url_post', 'title', 'text',
                   'author', 'num_comments', 'num_likes', ]
 
 
-class PostDetailSerializer(serializers.HyperlinkedModelSerializer):
+class PostDetailSerializer(serializers.ModelSerializer):
 
-    author = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name='api:user-detail')
+    author = UserSerializer(many=False, read_only=True) 
     like_url = serializers.SerializerMethodField()
     num_likes = serializers.SerializerMethodField()
     comments = CommentSerializer(many=True, read_only=True)
@@ -123,17 +121,6 @@ class PostDetailSerializer(serializers.HyperlinkedModelSerializer):
         model = Post
         fields = ['id', 'title', 'text', 'author', 'num_likes',
                   'like_url', 'comment_url', 'comments', ]
-
-    # nie wiem jak ustawić odpowiedni formularz żeby wyświatlała się tylko kolumna 'text', aktualnie wyświetla sie 'title' i 'text'  - próba 1
-    # nie wyświetla mi się w ogóle html form do wstawiania komentarza - próba 2
-    def get_comment_url(self, obj):
-        request = self.context.get('request')
-        if request is None:
-            return None
-        # próba 1
-        return reverse(viewname='api:post-router-comment', kwargs={'pk': obj.pk}, request=request)
-        # próba 2
-        return reverse(viewname='api:comment', kwargs={'pk': obj.pk}, request=request)
 
     def get_num_likes(self, obj):
         num_likes = obj.users_like.all().count()
@@ -157,12 +144,3 @@ class ActionSerializer(serializers.ModelSerializer):
         model = Action
         fields = ['id', 'user', 'verb', '']
 
-
-#      class PostSerializer(serializers.ModelSerializer):
-#     comments = CommentSerializer(many=True, read_only=True)
-#     author = serializers.HyperlinkedIdentityField(view_name='user-detail', lookup_field = 'pk', format='html')
-#     url = serializers.HyperlinkedIdentityField(view_name="api:tweet-detail")
-
-#     class Meta:
-#         model = Tweet
-#         fields = ['id','url', 'author', 'title', 'text', 'comments', 'users_like']

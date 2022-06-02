@@ -31,7 +31,6 @@ class RegisterUser(generics.GenericAPIView):
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
-
     queryset = get_user_model().objects.all()
 
     def get_serializer_class(self):
@@ -42,7 +41,6 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class PostViewSet(viewsets.ModelViewSet):
-
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     authentication_classes = (BasicAuthentication,)
@@ -115,7 +113,6 @@ class CommentCreate(generics.CreateAPIView):
     queryset = Post.objects.all()
     serializer_class = CommentSerializer
 
-    # próba 1
     def post(self, request, *args, **kwargs):
         serializer = Comment(data=request.data)
         if serializer.is_valid():
@@ -127,33 +124,3 @@ class CommentCreate(generics.CreateAPIView):
         else:
             data = {'coś:nie tak'}
         return Response(data)
-
-    # @action(detail=True, methods=['post'], url_name='comment')
-    # ###### nie wyświetla się żaden html form
-    # def comment(self, request, *args, **kwargs):
-    #     post = self.get_object()
-    #     author = request.user
-    #     text = request.data['text']
-    #     new_comment = Comment.objects.create(post=post, author=author, text=text)
-    #     new_comment.save()
-    #     make_action(user=author, verb='skomentował', content_object=post)
-    #     return Response({'Commented':True})
-
-
-# class TweetListView(generics.ListAPIView):
-#     queryset = Tweet.objects.all()
-#     serializer_class = TweetSerializer
-
-# class TweetDetailView(generics.RetrieveAPIView):
-#     queryset = Tweet.objects.all()
-#     serializer_class = TweetSerializer
-
-# class TweetLikeView(APIView):
-#     authentication_classes = (BasicAuthentication,)
-#     permission_classes = (IsAuthenticated,)
-
-#     def post(self, request, pk, format=None):
-#         post = get_object_or_404(Tweet, pk=pk)
-#         post.users_like.add(request.user)
-#         make_action(request.user, 'polubił', post)
-#         return Response({"liked":True})

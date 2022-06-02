@@ -12,11 +12,6 @@ router.register('actions', views.ActionViewSet)
 app_name = 'api'
 
 urlpatterns = [
-    #path('posts/<pk>/like/', views.TweetLikeView.as_view(), name='post_like'),
-    # path('posts/', views.TweetListView.as_view(), name='posts_list'),
-    # path('posts/<pk>/', views.TweetDetailView.as_view(), name='post_detail'),
-    # path('users/', user_list , name='user-list'),
-    # path('users/<int:pk>/', user_detail, name='user-detail'),
     path('', include(router.urls)),
     path('user-posts/<int:id>/',
          views.PostUserViewSet.as_view({'get': 'list'}), name='user-post'),
