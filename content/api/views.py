@@ -68,8 +68,7 @@ class PostViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=['post'], url_name='comment')
     # action for giving comment
@@ -103,13 +102,11 @@ class PostUserViewSet(PostViewSet):
 
 
 class ActionViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-
     queryset = Action.objects.all()
     serializer_class = ActionSerializer
 
 
 class CommentCreate(generics.CreateAPIView):
-
     queryset = Post.objects.all()
     serializer_class = CommentSerializer
 
@@ -122,5 +119,5 @@ class CommentCreate(generics.CreateAPIView):
             new_comment = Comment(post=post, author=author, text=text)
             data = {'powstał': new_comment.post}
         else:
-            data = {'coś:nie tak'}
+            data = {'coś':'nie tak'}
         return Response(data)
