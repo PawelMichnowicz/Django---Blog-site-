@@ -21,6 +21,7 @@ class RegisterUser(generics.GenericAPIView):
     def post(self, request, *args, **kwargs):
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
+            data = {}
             user = serializer.save()
             data['Response'] = 'Założono konto'
             data['username'] = user.username

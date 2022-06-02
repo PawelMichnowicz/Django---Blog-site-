@@ -2,14 +2,12 @@
 .git
 .gitignore
 
-# Docker
-.docker
-
 # Python
 app/__pycache__/
 app/*/__pycache__/
 app/*/*/__pycache__/
 app/*/*/*/__pycache__/
+.env
 
 # DB
-dumpdata.json
+db3.json

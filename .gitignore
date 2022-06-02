@@ -1,5 +1,5 @@
 db.sqlite3
 *__pycache__
 media
-dumpdata.json
-siema.txt
+db3.json
+my-db
